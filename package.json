@@ -27,13 +27,15 @@
     "index.js",
     ".env.example",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "bin": {
     "qobuz-dl": "./index.js"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "smoke": "node --check index.js && node index.js --help"
   },
   "dependencies": {
     "chalk": "^4.1.2",

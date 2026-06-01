@@ -177,8 +177,8 @@ async function loginCookieWithChrome(timeoutMs = 120000) {
 
   const port = await waitForDevToolsPort(profileDir);
   const started = Date.now();
-  console.log(chalk.cyan(`Chrome wurde geöffnet: ${BASE_URL}`));
-  console.log(chalk.gray('Captcha im Chrome-Fenster lösen. Die CLI liest den HttpOnly-Cookie automatisch.'));
+  console.log(chalk.cyan(`Chrome opened: ${BASE_URL}`));
+  console.log(chalk.gray('Solve the captcha in Chrome. The CLI will read the HttpOnly cookie automatically.'));
 
   while (Date.now() - started < timeoutMs) {
     const cookie = await readCaptchaCookieFromChrome(port).catch(() => '');
@@ -247,8 +247,8 @@ function readLine() {
   });
 }
 
-function ask(prompt) {
-  process.stdout.write(prompt);
+function ask(question) {
+  process.stdout.write(question);
   return readLine();
 }
 
@@ -259,12 +259,12 @@ function showHelp() {
   console.log('Options:');
   console.log('  -o, --output <dir>     Output directory (default: ./downloads)');
   console.log('  -q, --quality <id>     Quality: 27=Hi-Res, 7=FLAC 16-bit (default), 6=Lossless, 5=MP3');
-  console.log('  -y, --yes              Auto-accept (nur bei Score >= 1.5)');
-  console.log('  -c, --confirm          Immer nachfragen');
-  console.log('  --min-score <n>        Mindest-Score für -y (default: 1.5)');
-  console.log('  --no-convert           Keine WAV-Konvertierung (FLAC behalten)');
-  console.log('  --login-cookie         Chrome öffnen, Captcha lösen, HttpOnly-Cookie automatisch speichern');
-  console.log('  --via-terminal         In Terminal.app neu starten (VPN Split-Tunnel umgehen)');
+  console.log('  -y, --yes              Auto-accept matches at or above --min-score');
+  console.log('  -c, --confirm          Always ask before choosing a match');
+  console.log('  --min-score <n>        Minimum score for -y (default: 1.5)');
+  console.log('  --no-convert           Keep FLAC files instead of converting to WAV');
+  console.log('  --login-cookie         Open Chrome and save the HttpOnly captcha cookie automatically');
+  console.log('  --via-terminal         Relaunch in Terminal.app on macOS');
   console.log('  -h, --help             Show this help\n');
   console.log('Playlist formats:');
   console.log('  .m3u / .m3u8           #EXTINF lines: "#EXTINF:123,Artist - Title"');
@@ -275,9 +275,9 @@ function showHelp() {
   console.log('  Spotify playlist:      https://open.spotify.com/playlist/...\n');
   console.log('Environment (.env):');
   console.log('  QOBUZ_BASE_URL         API base URL (default: https://qobuz.squid.wtf)');
-  console.log('  QOBUZ_COOKIE           Optionaler Cookie-Header für den API-Zugriff');
-  console.log('                         (normalerweise per --login-cookie automatisch gesetzt)');
-  console.log('  QOBUZ_COOKIE_FILE      Cookie-Datei (default: ~/.qobuz-cookie)');
+  console.log('  QOBUZ_COOKIE           Optional Cookie header for backend download requests');
+  console.log('                         (usually set automatically with --login-cookie)');
+  console.log('  QOBUZ_COOKIE_FILE      Cookie file (default: ~/.qobuz-cookie)');
   console.log('  QOBUZ_OUTPUT_DIR       Output directory (default: ./downloads)');
   console.log('  QOBUZ_QUALITY          Default quality (default: 7)');
   console.log('  QOBUZ_ALWAYS_CONFIRM   Always ask confirmation (default: false)\n');
@@ -690,26 +690,26 @@ async function handleServerCaptcha(track, artist, title) {
   console.log(chalk.yellow(`\n    ⚠ Captcha required`));
 
   if (COOKIE_HEADER) {
-    console.log(chalk.red(`    Cookie ist abgelaufen oder ungültig.`));
+    console.log(chalk.red('    Cookie expired or is invalid.'));
     COOKIE_HEADER = '';
   }
 
   try {
     const cookie = await loginCookieWithChrome();
     if (cookie) {
-      console.log(chalk.green(`    ✓ Cookie automatisch gespeichert in ${COOKIE_FILE}`));
+      console.log(chalk.green(`    ✓ Cookie saved to ${COOKIE_FILE}`));
       return 'retry';
     }
   } catch (err) {
-    console.log(chalk.red(`    Automatischer Cookie-Login fehlgeschlagen: ${err.message}`));
+    console.log(chalk.red(`    Automatic cookie login failed: ${err.message}`));
     openBrowser(BASE_URL);
   }
 
-  const input = await ask(chalk.cyan('    Cookie optional einfügen oder Enter für Retry: '));
+  const input = await ask(chalk.cyan('    Paste a cookie or press Enter to retry: '));
   if (input) {
     COOKIE_HEADER = normalizeCookieHeader(input);
     writeCookieFile(COOKIE_HEADER);
-    console.log(chalk.green(`    ✓ Cookie gespeichert in ${COOKIE_FILE}`));
+    console.log(chalk.green(`    ✓ Cookie saved to ${COOKIE_FILE}`));
     return 'retry';
   }
   const answer = await ask(chalk.cyan('\n    [r] Retry  [s] Skip  [q] Quit: '));
@@ -906,10 +906,10 @@ async function main() {
   if (args.includes('--login-cookie')) {
     try {
       await loginCookieWithChrome();
-      console.log(chalk.green(`Cookie gespeichert in ${COOKIE_FILE}`));
+      console.log(chalk.green(`Cookie saved to ${COOKIE_FILE}`));
       process.exit(0);
     } catch (err) {
-      console.error(chalk.red(`Cookie-Login fehlgeschlagen: ${err.message}`));
+      console.error(chalk.red(`Cookie login failed: ${err.message}`));
       process.exit(1);
     }
   }
