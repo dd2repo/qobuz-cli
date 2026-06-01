@@ -27,7 +27,6 @@ Bereits heruntergeladen: `~/Music/qobuz-dl/` (67 WAVs)
 ## Aufruf
 
 ```bash
-export QOBUZ_COOKIE="captcha_verified_at=..."
 qobuz-dl playlist.txt -y --min-score 1.5 -o ~/Music/qobuz-dl
 ```
 

@@ -2,6 +2,8 @@
 
 CLI for resolving playlist tracks against Qobuz via `qobuz.squid.wtf`, downloading them sequentially, and converting FLAC downloads to WAV 16-bit / 44.1 kHz.
 
+Use this project only with music you are legally allowed to access and download. The author does not provide Qobuz credentials, Qobuz accounts, or access to paid content.
+
 ## Features
 
 - Reads `.m3u`, `.m3u8`, `.txt`, Qobuz track/album URLs, and Spotify playlist URLs.
@@ -27,6 +29,13 @@ CLI for resolving playlist tracks against Qobuz via `qobuz.squid.wtf`, downloadi
 ```bash
 npm install
 cp .env.example .env
+```
+
+Optional local CLI install:
+
+```bash
+npm link
+qobuz-dl --help
 ```
 
 Set Spotify credentials in `.env` if you use Spotify playlists:
@@ -65,6 +74,13 @@ node index.js --login-cookie
 The backend sets a HttpOnly `captcha_verified_at` cookie after captcha completion. The CLI avoids manual cookie copy/paste by launching a separate Chrome profile with DevTools Protocol enabled. After the captcha is solved, it reads the HttpOnly cookie through CDP and stores it in `~/.qobuz-cookie`.
 
 Search requests do not send the cookie. Download URL requests use the cookie and trigger an automatic refresh when auth/captcha fails.
+
+## Safety Notes
+
+- Do not commit `.env`, `~/.qobuz-cookie`, logs, or downloaded audio.
+- Spotify credentials must be supplied through environment variables or `.env`.
+- `--login-cookie` starts a separate Chrome profile under `~/.qobuz-cli/chrome-profiles`.
+- `--via-terminal` is macOS-specific.
 
 ## Changelog
 
